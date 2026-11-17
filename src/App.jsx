@@ -1,14 +1,23 @@
-function App() {
-  return (
-    <main className="app-shell">
-      <section className="welcome-card">
-        <span className="eyebrow">AMLAK IRAN</span>
-        <h1>به املاک ایران خوش آمدید</h1>
-        <p>پروژه React با موفقیت راه‌اندازی شد و آماده توسعه است.</p>
-        <div className="status"><span className="status-dot" /> React is running</div>
-      </section>
-    </main>
-  )
-}
+import { useState } from 'react'
 
-export default App
+const homes = [
+ {title:'آپارتمان مدرن در زعفرانیه',place:'تهران، زعفرانیه',price:'۱۸٬۵۰۰٬۰۰۰٬۰۰۰',area:'۱۸۵',rooms:'۳',tag:'فروش ویژه',photo:'photo-1600607687939-ce8a6c25118c'},
+ {title:'ویلای دنج با طراحی مدرن',place:'مازندران، نوشهر',price:'۲۶٬۰۰۰٬۰۰۰٬۰۰۰',area:'۳۲۰',rooms:'۴',tag:'تازه‌وارد',photo:'photo-1600607687920-4e2a09cf159d'},
+ {title:'واحد خوش‌نقشه و نورگیر',place:'تهران، سعادت‌آباد',price:'۹٬۸۰۰٬۰۰۰٬۰۰۰',area:'۱۲۵',rooms:'۲',tag:'قیمت مناسب',photo:'photo-1600566753086-00f18fb6b3ea'}
+]
+function Icon({type}) {
+ const paths={home:<><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7h-6v7H4a1 1 0 0 1-1-1Z"/></>,pin:<><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></>,search:<><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></>,bed:<><path d="M2 4v16M2 8h18a2 2 0 0 1 2 2v10M2 17h20M6 8v9"/></>}
+ return <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">{paths[type]}</svg>
+}
+export default function App(){
+ const [mode,setMode]=useState('خرید'),[city,setCity]=useState('همه شهرها'),[query,setQuery]=useState(''),[menu,setMenu]=useState(false)
+ const visible=homes.filter(x=>(x.title+x.place).includes(query))
+ return <div className="site" dir="rtl">
+  <header className="topbar"><a className="brand" href="#"><span className="brand-icon"><Icon type="home"/></span><span><b>املاک ایران</b><small>خانه‌ای برای زندگی بهتر</small></span></a><button className="mobile-menu" onClick={()=>setMenu(!menu)}>☰</button><nav className={menu?'nav open':'nav'}><a className="current" href="#">صفحه اصلی</a><a href="#homes">ملک‌های منتخب</a><a href="#services">خدمات ما</a><a href="#about">درباره ما</a></nav><a className="submit" href="#contact">سپردن ملک <span>↗</span></a></header>
+  <main><section className="hero"><div className="hero-bg"/><div className="hero-overlay"/><div className="hero-content"><div className="kicker"><i/> انتخاب هوشمندانه، زندگی دلخواه</div><h1>خانه‌ای که<br/><em>رویای شماست</em>، همین‌جاست.</h1><p>برای پیدا کردن خانه ایده‌آلتان، از میان بهترین فایل‌های ملکی ایران جست‌وجو کنید.</p><div className="searchbox"><div className="tabs">{['خرید','اجاره','رهن'].map(x=><button className={mode===x?'chosen':''} onClick={()=>setMode(x)} key={x}>{x}</button>)}</div><div className="searchrow"><label><small>موقعیت مکانی</small><span><Icon type="pin"/><select value={city} onChange={e=>setCity(e.target.value)}>{['همه شهرها','تهران','کرج','اصفهان','شیراز','مشهد','نوشهر'].map(x=><option key={x}>{x}</option>)}</select></span></label><label className="query"><small>جست‌وجوی ملک</small><span><Icon type="search"/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="محله، منطقه یا کد ملک..."/></span></label><button className="search-btn" onClick={()=>document.getElementById('homes').scrollIntoView({behavior:'smooth'})}><Icon type="search"/> جست‌وجو</button></div></div><div className="hero-note">✦ همراه هزاران نفر برای انتخاب خانه بهتر</div></div><div className="hero-seal"><b>+۱۲</b><span>سال تجربه در<br/>بازار ملک</span></div></section>
+  <section className="stats"><div><b>۲٬۴۰۰+</b><small>ملک ثبت‌شده</small></div><i/><div><b>۱٬۸۰۰+</b><small>مشتری راضی</small></div><i/><div><b>۱۲</b><small>سال تجربه</small></div><i/><div><b>۲۴/۷</b><small>پشتیبانی همراه شما</small></div></section>
+  <section className="homes wrap" id="homes"><div className="section-head"><div><small>منتخب املاک ایران</small><h2>ملک‌هایی برای <em>زندگی بهتر</em></h2><p>نگاهی به جدیدترین و خاص‌ترین فایل‌های ملکی ما</p></div><a href="#homes">مشاهده همه فایل‌ها ←</a></div><div className="cards">{visible.map((x,i)=><article className="property" key={x.title}><div className="photo" style={{backgroundImage:'url(https://images.unsplash.com/'+x.photo+'?auto=format&fit=crop&w=900&q=85)'}}><label>{x.tag}</label><button aria-label="علاقه‌مندی">♡</button></div><div className="details"><small>⌖ {x.place}</small><h3>{x.title}</h3><div className="features"><span>▣ {x.area} متر</span><span><Icon type="bed"/> {x.rooms} خواب</span></div><div className="price"><small>قیمت کل</small><b>{x.price} <small>تومان</small></b></div></div></article>)}</div>{!visible.length&&<p className="empty">ملکی با این عبارت پیدا نشد؛ عبارت دیگری را امتحان کنید.</p>}</section>
+  <section className="services" id="services"><div className="service-inner"><div><small>چرا املاک ایران؟</small><h2>مسیر خانه‌دار شدن،<br/><em>با خیال راحت</em></h2><p>از اولین جست‌وجو تا امضای قرارداد، در تمام مراحل کنار شما هستیم.</p><a href="#contact">با مشاوران ما آشنا شوید ←</a></div><div className="benefits"><article><i>✓</i><div><b>فایل‌های بررسی‌شده</b><p>اطلاعات دقیق و شفاف برای انتخابی مطمئن</p></div></article><article><i>⌂</i><div><b>مشاوره تخصصی</b><p>همراهی مشاوران باتجربه در تمام مسیر</p></div></article><article><i>✓</i><div><b>معامله امن و آسان</b><p>شفافیت در جزئیات و آرامش در تصمیم‌گیری</p></div></article></div></div></section>
+  <section className="contact wrap" id="contact"><div><small>شروع یک انتخاب تازه</small><h2>دنبال خانه‌ای خاص هستید؟</h2><p>اجازه دهید مشاوران ما شما را به انتخاب درست نزدیک‌تر کنند.</p></div><a href="mailto:info@amlak-iran.ir">با ما در تماس باشید ↗</a></section></main>
+  <footer id="about"><b>⌂ املاک ایران</b><span>© تمامی حقوق برای املاک ایران محفوظ است.</span><a href="#">بازگشت به بالا ↑</a></footer></div>
+}
