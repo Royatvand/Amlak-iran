@@ -37,7 +37,7 @@ function Icon({type}) {
 function Home(){
  const [mode,setMode]=useState('خرید'),[region,setRegion]=useState('همه مناطق'),[neighborhood,setNeighborhood]=useState('همه محله‌ها'),[query,setQuery]=useState(''),[menu,setMenu]=useState(false),[showPhones,setShowPhones]=useState(false)
  const [homes,setHomes]=useState(initialHomes)
- useEffect(()=>{fetch('/api/properties').then(r=>r.ok?r.json():Promise.reject()).then(data=>{if(data.properties?.length)setHomes(data.properties.map(x=>({title:x.title,region:String(x.region),neighborhood:x.neighborhood,place:'تهران، منطقه '+x.region+'، '+x.neighborhood,price:x.price,area:String(x.area),rooms:String(x.rooms),tag:x.deal_type+' جدید',image_url:x.image_url,photo:'photo-1600607687939-ce8a6c25118c'}))) }).catch(()=>{})},[])
+ useEffect(()=>{fetch('/api/properties').then(r=>r.ok?r.json():Promise.reject()).then(data=>{if(Array.isArray(data.properties))setHomes(data.properties.map(x=>({title:x.title,region:String(x.region),neighborhood:x.neighborhood,place:'تهران، منطقه '+x.region+'، '+x.neighborhood,price:x.price,area:String(x.area),rooms:String(x.rooms),tag:x.deal_type+' جدید',image_url:x.image_url,photo:'photo-1600607687939-ce8a6c25118c'}))) }).catch(()=>{})},[])
  const neighborhoodOptions=region==='همه مناطق'?['همه محله‌ها',...new Set(Object.values(regions).flat())]:['همه محله‌ها',...(regions[region]||[])]
  const visible=useMemo(()=>homes.filter(x=>(region==='همه مناطق'||x.region===region)&&(neighborhood==='همه محله‌ها'||x.neighborhood===neighborhood)&&((x.title+x.place+x.neighborhood).includes(query))),[region,neighborhood,query])
  const changeRegion=e=>{setRegion(e.target.value);setNeighborhood('همه محله‌ها')}
