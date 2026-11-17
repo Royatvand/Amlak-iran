@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { ArrowRight, BedDouble, MapPin, Ruler, ChevronLeft, ChevronRight, House, Image as ImageIcon } from 'lucide-react'
+import { isClosed, closedLabel, amenityLabels } from './listing.js'
 import './property-detail.css'
 
 function formatPrice(value) {
@@ -39,7 +40,7 @@ export default function PropertyDetail({ id }) {
   return <main className="property-detail-page" dir="rtl">
     <header className="detail-topbar"><a href="/" className="detail-brand"><House size={22}/><span>املاک ایران ۲۲</span></a><a href="/" className="detail-back"><ArrowRight size={17}/> بازگشت به آگهی‌ها</a></header>
     <div className="property-detail-wrap">
-      <div className="detail-heading"><div><span className="detail-kicker">{property.deal_type || 'ملک'} · منطقه {Number(property.region).toLocaleString('fa-IR')}</span><h1>{property.title}</h1><p><MapPin size={16}/>{property.neighborhood}، تهران</p></div><span className="detail-status">{property.deal_type || 'فروش'}</span></div>
+      <div className="detail-heading"><div><span className="detail-kicker">{property.deal_type || 'ملک'} · منطقه {Number(property.region).toLocaleString('fa-IR')}</span><h1>{property.title}</h1><p><MapPin size={16}/>{property.neighborhood}، تهران</p></div><span className={'detail-status' + (isClosed(property) ? ' is-closed' : '')}>{isClosed(property) ? closedLabel(property) : (property.deal_type || 'فروش')}</span></div>
       <section className="detail-gallery">
         {images.length ? <>
           <div className="detail-main-image">
@@ -51,7 +52,10 @@ export default function PropertyDetail({ id }) {
       </section>
       <div className="detail-content-grid">
         <section className="detail-description"><h2>درباره این ملک</h2><p>{property.description || 'توضیحاتی برای این ملک ثبت نشده است.'}</p></section>
-        <aside className="detail-facts"><h2>مشخصات ملک</h2><div><span><Ruler size={17}/> متراژ</span><b>{Number(property.area).toLocaleString('fa-IR')} متر</b></div><div><span><BedDouble size={17}/> اتاق خواب</span><b>{Number(property.rooms || 0).toLocaleString('fa-IR')}</b></div><div><span><MapPin size={17}/> محله</span><b>{property.neighborhood}</b></div><div className="detail-price"><span>قیمت کل</span><b>{formatPrice(property.price)} <small>تومان</small></b></div></aside>
+        <aside className="detail-facts"><h2>مشخصات ملک</h2><div><span><Ruler size={17}/> متراژ</span><b>{Number(property.area).toLocaleString('fa-IR')} متر</b></div><div><span><BedDouble size={17}/> اتاق خواب</span><b>{Number(property.rooms || 0).toLocaleString('fa-IR')}</b></div><div><span><MapPin size={17}/> محله</span><b>{property.neighborhood}</b></div>{amenityLabels(property).length > 0 && <div className="detail-amenities">{amenityLabels(property).map(a => <span key={a}>{a}</span>)}</div>}
+        {property.deal_type === 'اجاره'
+          ? <><div className="detail-price"><span>ودیعه</span><b>{formatPrice(property.deposit || property.price)} <small>تومان</small></b></div><div className="detail-price"><span>اجارهٔ ماهانه</span><b>{formatPrice(property.monthly_rent)} <small>تومان</small></b></div></>
+          : <div className="detail-price"><span>{property.deal_type === 'رهن' ? 'مبلغ رهن' : 'قیمت کل'}</span><b>{formatPrice(property.deposit || property.price)} <small>تومان</small></b></div>}</aside>
       </div>
     </div>
     <footer className="detail-footer"><span>AMLAK IRAN 22</span><a href="/">بازگشت به صفحه اصلی</a></footer>
