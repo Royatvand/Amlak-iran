@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180">
+<rect width="180" height="180" rx="28" fill="#203f32"/>
+<g fill="#f7f5ef" stroke="#f7f5ef" stroke-linejoin="round">
+<path d="M75 18 96 5 116 20V75L105 65V28L96 22V68L85 78V25L75 19Z" stroke-width="2"/>
+<path d="M42 55 55 46 69 56V92L60 99V64L55 61V102L42 112Z"/>
+<path d="M120 58 136 48 150 59V111L139 102V67L135 64V95L128 90V63L120 58Z"/>
+<path d="M20 117 90 62 160 117H148V145H32V117Z" stroke-width="3"/>
+<path d="M48 114 90 81 132 114V140H48Z" fill="#203f32" stroke-width="2"/>
+<path d="M80 140V126a10 10 0 0 1 20 0v14" fill="none" stroke-width="4"/>
+<path d="M77 99h9v9h-9zm17 0h9v9h-9zm-17 13h9v9h-9zm17 0h9v9h-9z" stroke="none"/>
+</g>
+<path d="M18 149Q90 140 162 149" fill="none" stroke="#f7f5ef" stroke-width="3"/>
+<text x="90" y="169" text-anchor="middle" font-family="Georgia,serif" font-size="14" font-weight="bold" fill="#f7f5ef" letter-spacing="1">AMLAK IRAN 22</text>
+</svg>
