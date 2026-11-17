@@ -55,7 +55,7 @@ function Home(){
 
 export default function App(){
   if (window.location.pathname.startsWith('/admin')) return <Admin />
-  const detailMatch = window.location.pathname.match(/^\\/property\\/(\\d+)\\/?$/)
+  const detailMatch = window.location.pathname.match(/^\/property\/(\d+)\/?$/)
   if (detailMatch) return <PropertyDetail id={detailMatch[1]} />
   return <Home />
 }
