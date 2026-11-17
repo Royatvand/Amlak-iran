@@ -1,5 +1,5 @@
 import { handleUpload } from '@vercel/blob/client'
-import { hasAdminSession } from '../_lib/auth.js'
+import { hasAdminSession } from '../../lib/server/auth.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
