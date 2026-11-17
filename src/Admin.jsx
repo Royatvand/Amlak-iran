@@ -4,7 +4,7 @@ import { LayoutDashboard, Building2, Plus, Search, Pencil, Trash2, Eye, EyeOff, 
 import AdminLogin from './AdminLogin.jsx'
 import './admin.css'
 
-const emptyForm = { title: '', deal_type: 'خرید', region: '1', neighborhood: '', price: '', area: '', rooms: '0', description: '', image_url: '', status: 'draft' }
+const emptyForm = { title: '', deal_type: 'خرید', region: '1', neighborhood: '', price: '', area: '', rooms: '0', description: '', images: [], image_url: '', status: 'draft' }
 const neighborhoods = {
   1: ['زعفرانیه','نیاوران','ولنجک','الهیه','فرمانیه','قیطریه','تجریش','اقدسیه'],
   2: ['سعادت‌آباد','شهرک غرب','گیشا','مرزداران','صادقیه','ستارخان'],
@@ -71,27 +71,54 @@ export default function Admin() {
   function openCreate() { setEditing(null); setForm(emptyForm); setError(''); setPage('form') }
   function openEdit(item) {
     setEditing(item)
-    setForm({ title: item.title || '', deal_type: item.deal_type || 'خرید', region: String(item.region), neighborhood: item.neighborhood || '', price: item.price || '', area: String(item.area || ''), rooms: String(item.rooms || 0), description: item.description || '', image_url: item.image_url || '', status: item.status || 'draft' })
+    const images = Array.isArray(item.images) && item.images.length ? item.images : (item.image_url ? [item.image_url] : [])
+    setForm({ title: item.title || '', deal_type: item.deal_type || 'خرید', region: String(item.region), neighborhood: item.neighborhood || '', price: item.price || '', area: String(item.area || ''), rooms: String(item.rooms || 0), description: item.description || '', images, image_url: images[0] || '', status: item.status || 'draft' })
     setError(''); setPage('form')
   }
 
-  async function uploadImage(file) {
-    if (!file) return
-    if (!['image/jpeg','image/png','image/webp'].includes(file.type)) { setError('فرمت تصویر باید JPG، PNG یا WEBP باشد.'); return }
-    if (file.size > 5 * 1024 * 1024) { setError('حجم تصویر نباید بیشتر از ۵ مگابایت باشد.'); return }
+  async function uploadImages(fileList) {
+    const files = Array.from(fileList || [])
+    if (!files.length) return
+    const remaining = 10 - form.images.length
+    if (remaining <= 0) { setError('برای هر آگهی حداکثر ۱۰ تصویر می‌توانید ثبت کنید.'); return }
+    if (files.length > remaining) { setError('حداکثر ' + remaining + ' تصویر دیگر می‌توانید اضافه کنید.'); return }
+    const invalid = files.find(file => !['image/jpeg','image/png','image/webp'].includes(file.type) || file.size > 5 * 1024 * 1024)
+    if (invalid) { setError('همه تصاویر باید JPG، PNG یا WEBP و حداکثر ۵ مگابایت باشند.'); return }
     setUploadBusy(true); setError('')
     try {
-      const blob = await upload('properties/' + Date.now() + '-' + file.name.replace(/[^a-zA-Z0-9._-]/g, '-'), file, { access: 'public', handleUploadUrl: '/api/admin/upload' })
-      setForm(current => ({ ...current, image_url: blob.url }))
-      setNotice('تصویر با موفقیت آپلود شد.')
-    } catch (err) { setError(err.message || 'آپلود تصویر انجام نشد.') } finally { setUploadBusy(false) }
+      const uploaded = await Promise.all(files.map(async (file, index) => {
+        const blob = await upload('properties/' + Date.now() + '-' + index + '-' + file.name.replace(/[^a-zA-Z0-9._-]/g, '-'), file, { access: 'public', handleUploadUrl: '/api/admin/upload' })
+        return blob.url
+      }))
+      setForm(current => {
+        const images = [...current.images, ...uploaded]
+        return { ...current, images, image_url: images[0] || '' }
+      })
+      setNotice(files.length.toLocaleString('fa-IR') + ' تصویر با موفقیت آپلود شد.')
+    } catch (err) { setError(err.message || 'آپلود تصاویر انجام نشد.') } finally { setUploadBusy(false) }
+  }
+
+  function removeImage(index) {
+    setForm(current => {
+      const images = current.images.filter((_, i) => i !== index)
+      return { ...current, images, image_url: images[0] || '' }
+    })
+  }
+
+  function setMainImage(index) {
+    setForm(current => {
+      const images = [...current.images]
+      const [main] = images.splice(index, 1)
+      images.unshift(main)
+      return { ...current, images, image_url: images[0] || '' }
+    })
   }
 
   async function saveProperty(event) {
     event.preventDefault(); setBusy(true); setError('')
     try {
       const url = editing ? '/api/admin/property?id=' + editing.id : '/api/admin/properties'
-      const response = await fetch(url, { method: editing ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form), credentials: 'same-origin' })
+      const response = await fetch(url, { method: editing ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...form, image_url: form.images[0] || '', images: form.images }), credentials: 'same-origin' })
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || 'ذخیره آگهی انجام نشد.')
       await loadProperties(); setNotice(editing ? 'آگهی با موفقیت ویرایش شد.' : 'آگهی جدید ثبت شد.')
@@ -158,7 +185,21 @@ export default function Admin() {
               <label>قیمت (تومان) *<input required value={form.price} onChange={e => setForm({...form,price:e.target.value})} placeholder="مثلاً ۱۸٬۵۰۰٬۰۰۰٬۰۰۰"/></label>
               <label>متراژ (متر) *<input required type="number" min="1" value={form.area} onChange={e => setForm({...form,area:e.target.value})} placeholder="مثلاً ۱۲۵"/></label>
               <label>تعداد اتاق خواب<input type="number" min="0" max="20" value={form.rooms} onChange={e => setForm({...form,rooms:e.target.value})}/></label>
-              <label className="wide">تصویر ملک<div className="upload-row"><input type="url" value={form.image_url} onChange={e => setForm({...form,image_url:e.target.value})} placeholder="لینک تصویر یا آپلود فایل"/><label className="upload-button"><ImagePlus size={16}/>{uploadBusy ? 'در حال آپلود...' : 'انتخاب تصویر'}<input type="file" accept="image/jpeg,image/png,image/webp" disabled={uploadBusy} onChange={e => uploadImage(e.target.files?.[0])}/></label></div><small className="field-hint">فرمت‌های JPG، PNG و WEBP · حداکثر ۵ مگابایت</small>{form.image_url && <img className="image-preview" src={form.image_url} alt="پیش‌نمایش تصویر ملک"/>}</label>
+              <label className="wide">تصاویر ملک
+                <div className="upload-row">
+                  <span className="image-count">{form.images.length.toLocaleString('fa-IR')} از ۱۰ تصویر</span>
+                  <label className="upload-button"><ImagePlus size={16}/>{uploadBusy ? 'در حال آپلود...' : 'انتخاب چند تصویر'}<input type="file" multiple accept="image/jpeg,image/png,image/webp" disabled={uploadBusy || form.images.length >= 10} onChange={e => { uploadImages(e.target.files); e.target.value = '' }}/></label>
+                </div>
+                <small className="field-hint">فرمت‌های JPG، PNG و WEBP · حداکثر ۵ مگابایت برای هر تصویر · تصویر اول، عکس اصلی آگهی است.</small>
+                {form.images.length > 0 && <div className="image-preview-grid">{form.images.map((url, index) => <div className={'image-preview-item ' + (index === 0 ? 'is-main' : '')} key={url + index}>
+                  <img src={url} alt={'تصویر ملک ' + (index + 1)}/>
+                  {index === 0 && <span className="main-image-label">تصویر اصلی</span>}
+                  <div className="image-preview-actions">
+                    {index !== 0 && <button type="button" onClick={() => setMainImage(index)}>انتخاب به‌عنوان اصلی</button>}
+                    <button type="button" className="remove-image" onClick={() => removeImage(index)} aria-label="حذف تصویر"><Trash2 size={14}/></button>
+                  </div>
+                </div>)}</div>}
+              </label>
               <label className="wide">توضیحات ملک<textarea rows="4" value={form.description} onChange={e => setForm({...form,description:e.target.value})} placeholder="توضیحات کامل ملک..."/></label>
               <label>وضعیت انتشار<select value={form.status} onChange={e => setForm({...form,status:e.target.value})}><option value="draft">پیش‌نویس</option><option value="published">انتشار در سایت</option></select></label>
             </div>
