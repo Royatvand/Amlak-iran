@@ -1,5 +1,5 @@
-import { requireAdmin } from '../_lib/auth.js'
-import { ensurePropertiesTable } from '../_lib/db.js'
+import { requireAdmin } from '../../lib/server/auth.js'
+import { ensurePropertiesTable } from '../../lib/server/db.js'
 
 export default async function handler(req, res) {
   if (!requireAdmin(req, res)) return
