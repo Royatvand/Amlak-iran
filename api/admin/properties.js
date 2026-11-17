@@ -1,6 +1,8 @@
+import { requireAdmin } from '../../lib/server/auth.js'
 import { readProperties, writeProperties, validateProperty } from '../../lib/server/store.js'
 
 export default async function handler(req, res) {
+  if (!requireAdmin(req, res)) return
   try {
     if (req.method === 'GET') {
       const properties = await readProperties()
