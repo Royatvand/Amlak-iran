@@ -3,6 +3,7 @@ import { upload } from '@vercel/blob/client'
 import { LayoutDashboard, Building2, Plus, Search, Pencil, Trash2, Eye, EyeOff, X, Menu, House, MapPin, BedDouble, Ruler, ImagePlus, CheckCircle2, Clock3, LogOut } from 'lucide-react'
 import AdminLogin from './AdminLogin.jsx'
 import './admin.css'
+import { getPropertyImageSrc } from './image-url.js'
 
 const emptyForm = { title: '', deal_type: 'خرید', region: '1', neighborhood: '', price: '', area: '', rooms: '0', description: '', images: [], image_url: '', status: 'draft' }
 const neighborhoods = {
@@ -192,7 +193,7 @@ export default function Admin() {
                 </div>
                 <small className="field-hint">فرمت‌های JPG، PNG و WEBP · حداکثر ۵ مگابایت برای هر تصویر · تصویر اول، عکس اصلی آگهی است.</small>
                 {form.images.length > 0 && <div className="image-preview-grid">{form.images.map((url, index) => <div className={'image-preview-item ' + (index === 0 ? 'is-main' : '')} key={url + index}>
-                  <img src={url} alt={'تصویر ملک ' + (index + 1)}/>
+                  <img src={getPropertyImageSrc(url)} alt={'تصویر ملک ' + (index + 1)}/>
                   {index === 0 && <span className="main-image-label">تصویر اصلی</span>}
                   <div className="image-preview-actions">
                     {index !== 0 && <button type="button" onClick={() => setMainImage(index)}>انتخاب به‌عنوان اصلی</button>}
@@ -217,5 +218,5 @@ function EmptyState({ onCreate }) {
 
 function PropertyTable({ items, onEdit, onDelete, onToggle }) {
   if (!items.length) return <div className="empty-admin">هنوز آگهی‌ای ثبت نشده است.</div>
-  return <div className="table-scroll"><table className="properties-table"><thead><tr><th>ملک</th><th>منطقه</th><th>قیمت</th><th>وضعیت</th><th>عملیات</th></tr></thead><tbody>{items.map(item => <tr key={item.id}><td><div className="property-cell"><div className="property-thumb">{item.image_url ? <img src={item.image_url} alt="" onError={e => {e.currentTarget.style.display='none'}}/> : <House size={19}/>}</div><div><b>{item.title}</b><small>{item.neighborhood} · {item.area} متر</small></div></div></td><td>منطقه {Number(item.region).toLocaleString('fa-IR')}</td><td>{formatPrice(item.price)} <small>تومان</small></td><td><span className={'status-pill ' + (item.status === 'published' ? 'is-published' : 'is-draft')}>{item.status === 'published' ? 'منتشرشده' : 'پیش‌نویس'}</span></td><td><div className="row-actions"><button title={item.status === 'published' ? 'خارج کردن از انتشار' : 'انتشار'} onClick={() => onToggle(item)}>{item.status === 'published' ? <EyeOff size={17}/> : <Eye size={17}/>}</button><button title="ویرایش" onClick={() => onEdit(item)}><Pencil size={17}/></button><button className="delete-action" title="حذف" onClick={() => onDelete(item)}><Trash2 size={17}/></button></div></td></tr>)}</tbody></table></div>
+  return <div className="table-scroll"><table className="properties-table"><thead><tr><th>ملک</th><th>منطقه</th><th>قیمت</th><th>وضعیت</th><th>عملیات</th></tr></thead><tbody>{items.map(item => <tr key={item.id}><td><div className="property-cell"><div className="property-thumb">{item.image_url ? <img src={getPropertyImageSrc(item.image_url)} alt="" onError={e => {e.currentTarget.style.display='none'}}/> : <House size={19}/>}</div><div><b>{item.title}</b><small>{item.neighborhood} · {item.area} متر</small></div></div></td><td>منطقه {Number(item.region).toLocaleString('fa-IR')}</td><td>{formatPrice(item.price)} <small>تومان</small></td><td><span className={'status-pill ' + (item.status === 'published' ? 'is-published' : 'is-draft')}>{item.status === 'published' ? 'منتشرشده' : 'پیش‌نویس'}</span></td><td><div className="row-actions"><button title={item.status === 'published' ? 'خارج کردن از انتشار' : 'انتشار'} onClick={() => onToggle(item)}>{item.status === 'published' ? <EyeOff size={17}/> : <Eye size={17}/>}</button><button title="ویرایش" onClick={() => onEdit(item)}><Pencil size={17}/></button><button className="delete-action" title="حذف" onClick={() => onDelete(item)}><Trash2 size={17}/></button></div></td></tr>)}</tbody></table></div>
 }

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { ArrowRight, BedDouble, MapPin, Ruler, ChevronLeft, ChevronRight, House, Image as ImageIcon } from 'lucide-react'
 import './property-detail.css'
+import { getPropertyImageSrc } from './image-url.js'
 
 function formatPrice(value) {
   return String(value || '').replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/\B(?=(\d{3})+(?!\d))/g, '٬')
@@ -43,10 +44,10 @@ export default function PropertyDetail({ id }) {
       <section className="detail-gallery">
         {images.length ? <>
           <div className="detail-main-image">
-            <img src={images[activeImage]} alt={property.title + ' - تصویر ' + (activeImage + 1)} />
+            <img src={getPropertyImageSrc(images[activeImage])} alt={property.title + ' - تصویر ' + (activeImage + 1)} />
             {images.length > 1 && <><button className="gallery-arrow previous" onClick={() => changeImage(-1)} aria-label="تصویر قبلی"><ChevronRight/></button><button className="gallery-arrow next" onClick={() => changeImage(1)} aria-label="تصویر بعدی"><ChevronLeft/></button><span className="gallery-counter">{(activeImage + 1).toLocaleString('fa-IR')} / {images.length.toLocaleString('fa-IR')}</span></>}
           </div>
-          {images.length > 1 && <div className="detail-thumbnails">{images.map((url,index)=><button key={url+index} className={index===activeImage?'selected':''} onClick={()=>setActiveImage(index)} aria-label={'نمایش تصویر '+(index+1)}><img src={url} alt=""/></button>)}</div>}
+          {images.length > 1 && <div className="detail-thumbnails">{images.map((url,index)=><button key={url+index} className={index===activeImage?'selected':''} onClick={()=>setActiveImage(index)} aria-label={'نمایش تصویر '+(index+1)}><img src={getPropertyImageSrc(url)} alt=""/></button>)}</div>}
         </> : <div className="detail-no-image"><ImageIcon size={42}/><span>تصویری برای این ملک ثبت نشده است.</span></div>}
       </section>
       <div className="detail-content-grid">
