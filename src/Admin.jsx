@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { upload } from '@vercel/blob/client'
 import { LayoutDashboard, Building2, Plus, Search, LogOut, Pencil, Trash2, Eye, EyeOff, X, Menu, House, MapPin, BedDouble, Ruler, ImagePlus, CheckCircle2, Clock3 } from 'lucide-react'
 import './admin.css'
 
@@ -42,6 +43,7 @@ export default function Admin() {
   const [editing, setEditing] = useState(null)
   const [form, setForm] = useState(emptyForm)
   const [busy, setBusy] = useState(false)
+  const [uploadBusy, setUploadBusy] = useState(false)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
   const [mobileNav, setMobileNav] = useState(false)
@@ -79,6 +81,18 @@ export default function Admin() {
     setEditing(item)
     setForm({ title: item.title || '', deal_type: item.deal_type || 'خرید', region: String(item.region), neighborhood: item.neighborhood || '', price: item.price || '', area: String(item.area || ''), rooms: String(item.rooms || 0), description: item.description || '', image_url: item.image_url || '', status: item.status || 'draft' })
     setError(''); setPage('form')
+  }
+
+  async function uploadImage(file) {
+    if (!file) return
+    if (!['image/jpeg','image/png','image/webp'].includes(file.type)) { setError('فرمت تصویر باید JPG، PNG یا WEBP باشد.'); return }
+    if (file.size > 5 * 1024 * 1024) { setError('حجم تصویر نباید بیشتر از ۵ مگابایت باشد.'); return }
+    setUploadBusy(true); setError('')
+    try {
+      const blob = await upload('properties/' + Date.now() + '-' + file.name.replace(/[^a-zA-Z0-9._-]/g, '-'), file, { access: 'public', handleUploadUrl: '/api/admin/upload' })
+      setForm(current => ({ ...current, image_url: blob.url }))
+      setNotice('تصویر با موفقیت آپلود شد.')
+    } catch (err) { setError(err.message || 'آپلود تصویر انجام نشد.') } finally { setUploadBusy(false) }
   }
 
   async function saveProperty(event) {
@@ -163,7 +177,7 @@ export default function Admin() {
               <label>قیمت (تومان) *<input required value={form.price} onChange={e => setForm({...form,price:e.target.value})} placeholder="مثلاً ۱۸٬۵۰۰٬۰۰۰٬۰۰۰"/></label>
               <label>متراژ (متر) *<input required type="number" min="1" value={form.area} onChange={e => setForm({...form,area:e.target.value})} placeholder="مثلاً ۱۲۵"/></label>
               <label>تعداد اتاق خواب<input type="number" min="0" max="20" value={form.rooms} onChange={e => setForm({...form,rooms:e.target.value})}/></label>
-              <label className="wide">آدرس تصویر (URL)<input type="url" value={form.image_url} onChange={e => setForm({...form,image_url:e.target.value})} placeholder="https://example.com/property.jpg"/><small className="field-hint"><ImagePlus size={14}/> در این مرحله لینک تصویر را وارد کنید؛ آپلود مستقیم تصویر در مرحله بعد اضافه می‌شود.</small></label>
+              <label className="wide">تصویر ملک<div className="upload-row"><input type="url" value={form.image_url} onChange={e => setForm({...form,image_url:e.target.value})} placeholder="لینک تصویر یا آپلود فایل"/><label className="upload-button"><ImagePlus size={16}/>{uploadBusy ? 'در حال آپلود...' : 'انتخاب تصویر'}<input type="file" accept="image/jpeg,image/png,image/webp" disabled={uploadBusy} onChange={e => uploadImage(e.target.files?.[0])}/></label></div><small className="field-hint">فرمت‌های JPG، PNG و WEBP · حداکثر ۵ مگابایت</small>{form.image_url && <img className="image-preview" src={form.image_url} alt="پیش‌نمایش تصویر ملک"/>}</label>
               <label className="wide">توضیحات ملک<textarea rows="4" value={form.description} onChange={e => setForm({...form,description:e.target.value})} placeholder="توضیحات کامل ملک..."/></label>
               <label>وضعیت انتشار<select value={form.status} onChange={e => setForm({...form,status:e.target.value})}><option value="draft">پیش‌نویس</option><option value="published">انتشار در سایت</option></select></label>
             </div>
