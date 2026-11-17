@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { upload } from '@vercel/blob/client'
-import { LayoutDashboard, Building2, Plus, Search, Pencil, Trash2, Eye, EyeOff, X, Menu, House, MapPin, BedDouble, Ruler, ImagePlus, CheckCircle2, Clock3 } from 'lucide-react'
+import { LayoutDashboard, Building2, Plus, Search, Pencil, Trash2, Eye, EyeOff, X, Menu, House, MapPin, BedDouble, Ruler, ImagePlus, CheckCircle2, Clock3, LogOut } from 'lucide-react'
+import AdminLogin from './AdminLogin.jsx'
 import './admin.css'
 
 const emptyForm = { title: '', deal_type: 'خرید', region: '1', neighborhood: '', price: '', area: '', rooms: '0', description: '', image_url: '', status: 'draft' }
@@ -45,6 +46,8 @@ export default function Admin() {
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
   const [mobileNav, setMobileNav] = useState(false)
+  const [authorized, setAuthorized] = useState(false)
+  const [authChecked, setAuthChecked] = useState(false)
 
   async function loadProperties() {
     const response = await fetch('/api/admin/properties', { credentials: 'same-origin' })
@@ -53,7 +56,17 @@ export default function Admin() {
     setProperties(data.properties || [])
   }
 
-  useEffect(() => { loadProperties().catch(err => setError(err.message)) }, [])
+  useEffect(() => {
+    fetch('/api/admin/me', { credentials: 'same-origin', cache: 'no-store' })
+      .then(response => response.json())
+      .then(data => setAuthorized(Boolean(data.authenticated)))
+      .catch(() => setAuthorized(false))
+      .finally(() => setAuthChecked(true))
+  }, [])
+
+  useEffect(() => {
+    if (authorized) loadProperties().catch(err => setError(err.message))
+  }, [authorized])
 
   function openCreate() { setEditing(null); setForm(emptyForm); setError(''); setPage('form') }
   function openEdit(item) {
@@ -111,6 +124,9 @@ export default function Admin() {
   const drafts = properties.length - published
   const filtered = useMemo(() => properties.filter(x => (statusFilter === 'all' || x.status === statusFilter) && (x.title + x.neighborhood + x.region).toLowerCase().includes(search.toLowerCase())), [properties, statusFilter, search])
 
+  if (!authChecked) return <main className="admin-login" dir="rtl"><div className="login-card">در حال بررسی دسترسی...</div></main>
+  if (!authorized) return <AdminLogin onSuccess={() => { setAuthorized(true); setError('') }} />
+
   return <div className="admin-shell" dir="rtl">
     <aside className={'admin-sidebar ' + (mobileNav ? 'mobile-open' : '')}>
       <a href="/" className="admin-brand"><span className="admin-brand-mark"><House size={22}/></span><span><b>AMLAK IRAN 22</b><small>پنل مدیریت</small></span></a>
@@ -118,7 +134,7 @@ export default function Admin() {
       <button className={page === 'dashboard' ? 'side-link active' : 'side-link'} onClick={() => {setPage('dashboard');setMobileNav(false)}}><LayoutDashboard size={18}/> داشبورد</button>
       <button className={page === 'properties' ? 'side-link active' : 'side-link'} onClick={() => {setPage('properties');setMobileNav(false)}}><Building2 size={18}/> آگهی‌های املاک</button>
       <button className="side-link" onClick={openCreate}><Plus size={18}/> ثبت آگهی جدید</button>
-      <div className="sidebar-bottom"><a href="/" className="side-link"><House size={18}/> مشاهده سایت</a><span className="side-link"><CheckCircle2 size={18}/> دسترسی مدیریت فعال</span></div>
+      <div className="sidebar-bottom"><a href="/" className="side-link"><House size={18}/> مشاهده سایت</a><button className="side-link logout" onClick={async () => { await fetch('/api/admin/logout', { method: 'POST', credentials: 'same-origin' }); setAuthorized(false); setProperties([]) }}><LogOut size={18}/> خروج از پنل</button><span className="side-link"><CheckCircle2 size={18}/> دسترسی مدیریت فعال</span></div>
     </aside>
     <main className="admin-main">
       <header className="admin-topbar"><button className="admin-menu-toggle" onClick={() => setMobileNav(!mobileNav)}><Menu/></button><div><span className="admin-breadcrumb">املاک ایران ۲۲</span><b>{page === 'dashboard' ? 'داشبورد' : page === 'properties' ? 'مدیریت آگهی‌ها' : editing ? 'ویرایش آگهی' : 'ثبت آگهی جدید'}</b></div><a href="/" className="view-site">مشاهده سایت <span>↗</span></a></header>
