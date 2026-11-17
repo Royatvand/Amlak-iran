@@ -101,3 +101,6 @@
 .image-preview-actions button{border:0;border-radius:6px;background:#edf3ed;color:#315a40;padding:6px 8px;font-size:9px}
 .image-preview-actions .remove-image{display:grid;place-items:center;background:#fff0ee;color:#b34b43;padding:6px}
 @media(max-width:540px){.image-preview-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.image-count{margin:0}}
+
+.status-pill.is-closed{background:#fbe9e7;color:#b3382c}
+.form-grid .amenity-checks{flex-direction:row;flex-wrap:wrap;align-items:center;gap:18px}.form-grid .check-option{flex-direction:row;align-items:center;gap:7px;font-size:11px;color:#344238}.form-grid .check-option input{width:auto;padding:0}

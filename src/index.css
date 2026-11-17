@@ -17,3 +17,8 @@
 .photo{position:relative;overflow:hidden;background:#e9eee8}
 .photo>.property-photo-image{position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:cover;object-position:center;z-index:0}
 .photo>label,.photo>button{z-index:1}
+
+/* Listing details: amenities, rent prices, sold/rented state */
+.amenity-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}.amenity-chips span{font-size:10px;padding:4px 9px;border-radius:20px;background:rgba(35,75,58,.09);opacity:.9}
+.property.is-closed .photo img{filter:grayscale(.85) brightness(.9)}.photo>label.closed-badge{background:#b3382c;color:#fff;font-weight:700}
+.price.rent{display:grid;grid-template-columns:1fr 1fr;gap:10px}.price.rent>span{display:flex;flex-direction:column;gap:3px}.price.rent b{font-size:13px}
