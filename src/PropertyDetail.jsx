@@ -3,7 +3,7 @@ import { ArrowRight, BedDouble, MapPin, Ruler, ChevronLeft, ChevronRight, House,
 import './property-detail.css'
 
 function formatPrice(value) {
-  return String(value || '').replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/\\B(?=(\\d{3})+(?!\\d))/g, '٬')
+  return String(value || '').replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/\B(?=(\d{3})+(?!\d))/g, '٬')
 }
 
 export default function PropertyDetail({ id }) {
